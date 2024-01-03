@@ -1,0 +1,44 @@
+<script type="module">
+  import { district } from './data.js';
+  //   console.log(district);
+  Promise.resolve(() => {});
+  console.time('⏳');
+  // 查找子元素
+  const findByid = (root_arr, root_id) => {
+    const child = [];
+    // for (let i = 0; i < root_arr.length; i++) {
+    //   if (root_arr[i].pid === root_id) child.push(root_arr[i]);
+    // }
+    root_arr?.forEach((item) => {
+      if (item.pid === root_id) child.push(item);
+    });
+    return child;
+  };
+
+  // console.log(findByid(1, district));
+  // 创建树形分类数组
+  const createTree = (data_arr, root_id = 0) => {
+    const result = findByid(data_arr, root_id);
+    // 无数据  返回空数组
+    console.log('=>', root_id);
+    if (!result.length) {
+      return null;
+    } else {
+      //   for (let i = 0; i < result.length; i++) {
+      //     if (createTree(data_arr, result[i].id)) {
+      //       //   console.log(item);
+      //       result[i]['children'] = createTree(data_arr, result[i].id);
+      //     }
+      //   }
+      result.forEach((item) => {
+        if (createTree(data_arr, item.id)) {
+          item['children'] = createTree(data_arr, item.id);
+        }
+      });
+    }
+    return result;
+  };
+  const res = createTree(district);
+  console.log(res);
+  console.timeEnd('⏳');
+</script>

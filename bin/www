@@ -1,0 +1,82 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+const { ip, port, baseUrl } = require("../config/ip");
+
+var app = require("../app");
+var debug = require("debug")("foods-app-api:server");
+var http = require("http");
+const { getFavorite, close } = require("../routes/socket");
+/**
+ * Get port from environment and store in Express.
+ */
+// app.set("port", port);
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+// WebSocket 路由
+const WebSocket = require("ws");
+// const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ server });
+// 引入 WebSocket 路由
+
+// // 在 HTTP 服务上启动 WebSocket 服务
+wss.on("connection", getFavorite);
+wss.on("close", close);
+wss.on("error", (err) => {
+  console.error("WebSocket server error:", err);
+});
+
+wss.on("listening", () => {
+  console.log("WebSocket server listening on port 3000.");
+});
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+server.listen(port, () => {
+  console.log(`服务器启动成功!   ${baseUrl}`);
+});
+server.on("error", onError);
+server.on("listening", onListening);
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== "listen") {
+    throw error;
+  }
+
+  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  debug("Listening on " + bind);
+}
+
